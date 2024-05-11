@@ -1,0 +1,2 @@
+rootProject.name = "jargon2"
+
