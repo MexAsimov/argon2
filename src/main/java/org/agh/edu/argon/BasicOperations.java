@@ -22,15 +22,15 @@ public class BasicOperations {
       zero(P) - generate P-byte zero string x
      */
 
-    public static String leftRot(String s, int i) {
+    public static byte[] leftRot(byte[] s, int i) {
         long value = convertToLong(s, 8);
         i = i % rotationBase;
-        return convertToString((value << i) & 0xFFFFFFFFL | (value >>> (rotationBase-i)), 8);
+        return convertToByte((value << i) & 0xFFFFFFFFL | (value >>> (rotationBase-i)), 8);
     }
-    public static String rightRot(String s, int i) {
+    public static byte[] rightRot(byte[] s, int i) {
         long value = convertToLong(s, 8);
         i = i % rotationBase;
-        return convertToString((value >>> i) | ((value << (rotationBase-i)) & 0xFFFFFFFFL), 8);
+        return convertToByte((value >>> i) | ((value << (rotationBase-i)) & 0xFFFFFFFFL), 8);
     }
 
     public static long trunc(long a) {
@@ -46,20 +46,20 @@ public class BasicOperations {
         return (a & mask) >>> start;
     }
 
-    public static String LE32(long a) {
-        return convertToString(a, 4);
+    public static byte[] LE32(long a) {
+        return convertToByte(a, 4);
     }
 
-    public static String LE64(long a) {
-        return convertToString(a, 8);
+    public static byte[] LE64(long a) {
+        return convertToByte(a, 8);
     }
 
 
-    public static long int32(String s) {
+    public static long int32(byte[] s) {
         return convertToLong(s, 4);
     }
 
-    public static long int64(String s) {
+    public static long int64(byte[] s) {
         return convertToLong(s, 8);
     }
 
@@ -68,11 +68,10 @@ public class BasicOperations {
         return new String(zeroBytes, charset);
     }
 
-    private static long convertToLong(String s, int noBytes) {
-        byte[] byteArray = s.getBytes(charset);
+    private static long convertToLong(byte[] byteArray, int noBytes) {
 
         if (byteArray.length != noBytes) {
-            throw new IllegalArgumentException("Illegal string length - " + s + " - should be " + noBytes);
+            throw new IllegalArgumentException("Illegal string length - should be " + noBytes);
         }
 
         ByteBuffer buffer = ByteBuffer.wrap(byteArray);
@@ -80,22 +79,26 @@ public class BasicOperations {
         return buffer.getLong();
     }
 
-    private static String convertToString(long value, int noBytes) {
-        ByteBuffer buffer = ByteBuffer.allocate(noBytes);
+    private static byte[] convertToByte(long value, int noBytes) {
+        ByteBuffer buffer = ByteBuffer.allocate(noBytes); //
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         try {
-            buffer.putLong(value);
+            if (noBytes == 8) {
+                buffer.putLong(value);
+            } else if (noBytes == 4){
+                buffer.putInt((int) value);
+            }
         } catch (IndexOutOfBoundsException e) {
             throw new IllegalArgumentException("Illegal long size - " + value + " - should be " + noBytes);
         }
         buffer.flip();
         byte[] byteArray = buffer.array();
 
-        StringBuilder sb = new StringBuilder();
-        for (byte b : byteArray) {
-            sb.append(String.format("%02X", b));
-        }
+//        StringBuilder sb = new StringBuilder();
+//        for (byte b : byteArray) {
+//            sb.append(String.format("%02X", b));
+//        }
 
-        return sb.toString();
+        return byteArray;
     }
 }
